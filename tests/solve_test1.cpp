@@ -17,13 +17,13 @@ void solve_test1()
 {
     rubicsCube myCube;
 
-    //myCube.doAction(rubicsCube::actions::frontCW);
-    //myCube.doAction(rubicsCube::actions::topCW);
-    //myCube.doAction(rubicsCube::actions::rightCW);
+    myCube.doAction(rubicsCube::actions::frontCW);
+    myCube.doAction(rubicsCube::actions::topCW);
+    myCube.doAction(rubicsCube::actions::rightCW);
     //myCube.doAction(rubicsCube::actions::bottomCW);
     //myCube.doAction(rubicsCube::actions::frontCW); 
 
-    myCube.shuffle(3);   
+    //myCube.shuffle(3); 
 
     std::cout << "unsolved cube\n";
     myCube.print();

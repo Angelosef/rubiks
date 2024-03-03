@@ -36,13 +36,13 @@ std::queue<node> expand(const node& branching_node)
         rubicsCube::actions action = static_cast<rubicsCube::actions>(i);
         changed_state.doAction(action);
 
-        node* child = new node;
-        child->state = changed_state;
-        child->parent = std::make_shared<node>(branching_node);
-        child->action = action;
-        child->cost = branching_node.cost + current_state.actionCost(action);
+        node child;
+        child.state = changed_state;
+        child.parent = std::make_shared<node>(branching_node);
+        child.action = action;
+        child.cost = branching_node.cost + current_state.actionCost(action);
 
-        children.push(*child);
+        children.push(child);
     }
 
     return children;
@@ -61,12 +61,12 @@ struct CompareFunction {
 
 node alphaStar (rubicsCube startingState, bool& foundSolution)
 {
-    node* start = new node;
-    start->state = startingState;
-    start->parent = nullptr;
+    node start;
+    start.state = startingState;
+    start.parent = nullptr;
 
     std::priority_queue<node, std::vector<node>, CompareFunction> frontier;
-    frontier.push(*start);
+    frontier.push(start);
 
     std::vector<node> reached;
 
@@ -107,7 +107,7 @@ node alphaStar (rubicsCube startingState, bool& foundSolution)
         }
     }
     foundSolution = false;
-    return *start;
+    return start;
 }
 
 std::vector<node> getSolution(node& goalNode)
