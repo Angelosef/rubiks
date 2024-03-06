@@ -3,6 +3,7 @@
 
 #include<queue>
 #include<stack>
+#include<vector>
 #include<functional>
 #include<memory>
 
@@ -22,27 +23,28 @@ namespace general
 
     struct node
     {
-        state* nodeState;
-        node* parent;
+        std::shared_ptr<state> nodeState;
+        std::shared_ptr<node> parent;
         int cost;
-        action* nodeAction;
+        std::shared_ptr<action> nodeAction;
     };
 
     class problem
     {
         public:
-        virtual state* initial() = 0;
+        virtual std::shared_ptr<state> initial() = 0;
         virtual bool isGoal(state& theState) = 0;
-        virtual state* result(state& theState, action& theAction) = 0;
+        virtual std::shared_ptr<state> result(state& theState, action& theAction) = 0;
         virtual int actionCost(state& theState, action& theAction) = 0;
-        virtual std::stack<action> getActions(state& theState) = 0;
+        virtual std::stack<std::shared_ptr<action>> getActions(state& theState) = 0;
     };
 
-    node* bestFirstSearch
+    node bestFirstSearch
     (problem* theProblem,
     std::function<bool(const general::node&, const general::node&)> order, bool& solved);
-    std::queue<node*> expandNode(problem* theProblem, node& theNode);
+    std::queue<std::shared_ptr<node>> expandNode(problem* theProblem, node& theNode);
     int searchForState(std::vector<node>& list, state& theState, bool& foundNode);
+    std::vector<node*> getSolution(node& goalNode);
 
 }
 

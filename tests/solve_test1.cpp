@@ -35,6 +35,7 @@ void solve_test1()
     {
         std::cout << "solved cube\n";
         std::vector<node> solutionPath = getSolution(solution);
+        std::cout << "got solution\n";
 
         for(int i=solutionPath.size()-2; i>=0; i += -1)
         {

@@ -3,7 +3,7 @@
 
 int main()
 {
-    solve_test1();
+    search2Test();
     
     return 0;
 }

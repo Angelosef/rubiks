@@ -13,6 +13,9 @@
                 "${workspaceFolder}/tests/test1.cpp",
                 "${workspaceFolder}/tests/test2.cpp",
                 "${workspaceFolder}/tests/solve_test1.cpp",
+                "${workspaceFolder}/source/search2.cpp",
+                "${workspaceFolder}/source/rubikOverload.cpp",
+                "${workspaceFolder}/tests/search2Test.cpp",
                 "-o",
                 "${workspaceFolder}/myprogram"
             ],

@@ -1,5 +1,7 @@
 #include"../headers/search2.h"
 
+#include<iostream>
+
 int general::searchForState
 (std::vector<general::node>& list, general::state& theState, bool& foundNode)
 {
@@ -8,7 +10,9 @@ int general::searchForState
     int index = 0;
     while(!foundNode && index < list.size())
     {
-        if(theState.isEqual(*list[index].nodeState))
+        std::shared_ptr<general::state> dummy = list[index].nodeState;
+
+        if(theState.isEqual(*(list[index].nodeState)))
         {
             foundNode = true;
             return index;
@@ -19,48 +23,52 @@ int general::searchForState
     return -1;
 }
 
-std::queue<general::node*> general::expandNode
+std::queue<std::shared_ptr<general::node>> general::expandNode
 (general::problem* theProblem, general::node& theNode)
 {
-    std::queue<node*> children;
+    std::queue<std::shared_ptr<general::node>> children;
 
-    general::state* current_state = theNode.nodeState;
+    std::shared_ptr<general::state> current_state = theNode.nodeState;
     
-    std::stack<general::action> availableActions = theProblem->getActions(*current_state);
+    std::stack<std::shared_ptr<general::action>> availableActions;
+    availableActions = theProblem->getActions(*current_state);
 
     while(!availableActions.empty())
     {
-        general::action* tryAction = &availableActions.top();
+        std::shared_ptr<general::action> tryAction = availableActions.top();
         availableActions.pop();
 
-        general::state* newState = theProblem->result(*current_state, *tryAction);
+        std::shared_ptr<general::state> newState;
+        newState = theProblem->result(*current_state, *tryAction);
+
         int cost = theNode.cost + theProblem->actionCost(*current_state, *tryAction);
 
         std::shared_ptr<general::node> child (new general::node());
-
+        
         child->cost = cost;
-        child->nodeAction = tryAction;
-        child->nodeState = newState;
-        child->parent = &theNode;
+        child->nodeAction = std::move(tryAction);
+        child->nodeState = std::move(newState);
+        child->parent = std::make_shared<node>(theNode);
 
-        children.push(child.get());
+        children.push(child);
     }
 
     return children;
 }
 
-general::node* general::bestFirstSearch
+general::node general::bestFirstSearch
 (general::problem* theProblem,
 std::function<bool(const general::node&, const general::node&)> order, bool& solved)
 {
-    general::state* startingState;
+    std::cout << "running bfs\n";
+    std::shared_ptr<general::state> startingState;
     startingState = theProblem->initial();
 
     std::shared_ptr<general::node> start = std::make_shared<general::node>();
     start->parent = nullptr;
     start->cost = 0;
-    start->nodeState = startingState;
-     
+    start->nodeState = std::move(startingState);
+
     std::priority_queue<general::node, std::vector<general::node>,
     decltype(order)> frontier(order);
     
@@ -70,21 +78,25 @@ std::function<bool(const general::node&, const general::node&)> order, bool& sol
 
     while(!frontier.empty())
     {
+        
         general::node explorationNode = frontier.top();
+
         frontier.pop();
 
         if(theProblem->isGoal(*explorationNode.nodeState))
         {
             solved = true;
-            return &explorationNode;
+            return explorationNode;
         }
 
-        std::queue<general::node*> children = expandNode(theProblem, explorationNode);
+        std::queue<std::shared_ptr<general::node>> children;
+        children = expandNode(theProblem, explorationNode);
+
         while(!children.empty())
         {
-            general::node child = *children.front();
+            general::node child = *children.front().get();
             children.pop();
-            general::state* newState = child.nodeState;
+            std::shared_ptr<general::state> newState = child.nodeState;
 
             bool found;
             int index = searchForState(reached, *newState, found);
@@ -105,8 +117,24 @@ std::function<bool(const general::node&, const general::node&)> order, bool& sol
         }
     }
     solved = false;
-    return start.get();
+    return *start.get();
 }
-    
+
+std::vector<general::node*> general::getSolution(general::node& goalNode)
+{
+    std::vector<node*> solution;
+
+    solution.push_back(&goalNode);
+
+    while(solution[solution.size()-1]->parent != nullptr)
+    {
+        node* lastNode = solution[solution.size()-1];
+        solution.push_back(lastNode->parent.get());
+    }
+
+    return solution;
+}
+
+
 
 

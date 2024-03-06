@@ -1,33 +1,48 @@
 #include"../headers/rubikOverload.h"
 
 #include<memory>
+#include<iostream>
+
+void rubikAction::doNothing()
+{
+
+}
 
 bool rubikState::isEqual(state& otherState)
 {
-    rubikState* otherRubikState = dynamic_cast<rubikState*>(&otherState);
-    return this->cube.isEqual(otherRubikState->cube);
+    if(rubikState* otherRubikState = dynamic_cast<rubikState*>(&otherState))
+    {
+        return this->cube.isEqual(otherRubikState->cube);    
+    }
+    return false;
+    
 }
 
-general::state* rubikProblem::initial()
+std::shared_ptr<general::state> rubikProblem::initial()
 {
     std::shared_ptr<rubikState> startState (new rubikState());
 
-    //up for changes
-    startState->cube.shuffle(2);
+    startState->cube.doAction(rubicsCube::actions::frontCW);
+    startState->cube.doAction(rubicsCube::actions::topCW);
+    startState->cube.doAction(rubicsCube::actions::rightCW);
+    //startState->cube.doAction(rubicsCube::actions::bottomCW);
 
-    return startState.get();
+    return startState;
 }
 
 bool rubikProblem::isGoal(general::state& theState)
 {
+    
     if(rubikState* ptr = dynamic_cast<rubikState*> (&theState))
     {
+    
         return ptr->cube.isGoal();
     }
     return false;
 }
 
-general::state* rubikProblem::result(general::state& theState, general::action& theAction)
+std::shared_ptr<general::state> rubikProblem::result
+(general::state& theState, general::action& theAction)
 {
     std::shared_ptr<rubikState> resultState (new rubikState());
 
@@ -38,7 +53,7 @@ general::state* rubikProblem::result(general::state& theState, general::action& 
     temp.doAction(actionPtr->theAction);
     resultState->cube = temp;
 
-    return resultState.get();
+    return resultState;
 }
 
 int rubikProblem::actionCost(general::state& theState, general::action& theAction)
@@ -50,19 +65,17 @@ int rubikProblem::actionCost(general::state& theState, general::action& theActio
     return statePtr->cube.actionCost(actionPtr->theAction);
 }
 
-std::stack<general::action> rubikProblem::getActions(general::state& theState)
+std::stack<std::shared_ptr<general::action>> rubikProblem::getActions(general::state& theState)
 {
-    std::stack<general::action> generatedActions;
+    std::stack<std::shared_ptr<general::action>> generatedActions;
     rubikState* statePtr = dynamic_cast<rubikState*> (&theState);
-
-    general::action* act;
 
     for(int i=0; i<statePtr->cube.numberOfActions; i++)
     {
-        rubikAction newAction;
-        newAction.theAction = (rubicsCube::actions)i;
+        std::shared_ptr<rubikAction> action (new rubikAction);
+        action->theAction = (rubicsCube::actions)i;
 
-        generatedActions.push(newAction);
+        generatedActions.push(action);
     }
 
     return generatedActions;
@@ -70,8 +83,8 @@ std::stack<general::action> rubikProblem::getActions(general::state& theState)
 
 bool orderFunc(const general::node& node1, const general::node& node2)
 {
-    rubikState* statePtr1 = dynamic_cast<rubikState*> (node1.nodeState);
-    rubikState* statePtr2 = dynamic_cast<rubikState*> (node2.nodeState);
+    rubikState* statePtr1 = dynamic_cast<rubikState*> (node1.nodeState.get());
+    rubikState* statePtr2 = dynamic_cast<rubikState*> (node2.nodeState.get());
 
     int value1 = node1.cost + statePtr1->cube.estimatedCostToSolve();
     int value2 = node2.cost + statePtr2->cube.estimatedCostToSolve();

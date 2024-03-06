@@ -16,19 +16,18 @@ class rubikState : public general::state
 class rubikAction : public general::action
 {
     public:
-    void doNothing() override
-    {}
+    void doNothing() override;
     rubicsCube::actions theAction;
 };
 
 class rubikProblem : public general::problem
 {
     public:
-    general::state* initial() override;
+    std::shared_ptr<general::state> initial() override;
     bool isGoal(general::state& theState) override;
-    general::state* result(general::state& theState, general::action& theAction) override;
+    std::shared_ptr<general::state> result(general::state& theState, general::action& theAction) override;
     int actionCost(general::state& theState, general::action& theAction) override;
-    std::stack<general::action> getActions(general::state& theState) override;
+    std::stack<std::shared_ptr<general::action>> getActions(general::state& theState) override;
 
     private:
     rubicsCube cube;
